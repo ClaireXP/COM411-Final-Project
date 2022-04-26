@@ -3,7 +3,6 @@ title: 'COM 411: Final Project'
 author: "Claire Poukey"
 output:
   html_document:
-    df_print: paged
     fig_align: center
   word_document:
     fig_width: 7.5

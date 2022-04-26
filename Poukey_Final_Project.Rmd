@@ -4,6 +4,8 @@ author: "Claire Poukey"
 output:
   html_document:
     fig_align: center
+    toc: true
+    toc_depth: 2
   word_document:
     fig_width: 7.5
 ---
@@ -202,6 +204,26 @@ ANALYZE INFLUENCE HERE
 
 EXPLAIN BETWEENNESS CENTRALITY HERE
 
+#### Table of ECESS Board Members and Their Respective Communication Centralities
+
+```{r}
+G_communication %>%
+  activate(nodes) %>%
+  mutate(
+    Eigen = centrality_eigen(),
+    Betweenness = centrality_betweenness(),
+    Indegree = centrality_degree(mode = 'in'),
+    Outdegree = centrality_degree(mode = 'out'),
+    Degree = centrality_degree(mode = 'all')
+  ) %>%
+
+  as_tibble() %>%
+  select(name, Exec, Eigen, Betweenness, Degree, Indegree, Outdegree) %>%
+  arrange(-Eigen)
+```
+
+DESCRIBE TABLE HERE
+
 ```{r, fig.cap = 'Undirected Network of Communication Levels Between ECESS Board Members'}
 G_communication %>%
   activate(edges) %>%
@@ -222,26 +244,6 @@ G_communication %>%
 ```
 
 DESCRIBE NETWORK HERE
-
-#### Table of ECESS Board Members and Their Respective Communication Centralities
-
-```{r}
-G_communication %>%
-  activate(nodes) %>%
-  mutate(
-    Eigen = centrality_eigen(),
-    Betweenness = centrality_betweenness(),
-    Indegree = centrality_degree(mode = 'in'),
-    Outdegree = centrality_degree(mode = 'out'),
-    Degree = centrality_degree(mode = 'all')
-  ) %>%
-
-  as_tibble() %>%
-  select(name, Exec, Eigen, Betweenness, Degree, Indegree, Outdegree) %>%
-  arrange(-Eigen)
-```
-
-DESCRIBE TABLE HERE
 
 ```{r, fig.height=4.75, fig.cap = 'Directed Friendship Network With Betweenness Centralities of ECESS Board Members'}
 G_friendship %>%

@@ -77,9 +77,9 @@ G_communication = graph_from_data_frame(d=communication_edges, v=nodes) %>% as_t
 
 At the base level, centrality measures how important, or central, a node is in a given network. This measurement of importance can be found through several different methods, such as degree centrality, eigenvector centrality, and betweenness centrality. In this analysis, we will explore each centrality and provide insights 
 
-## Insights on Popularity
+## Insights on Popularity and Image
 
-EXPLAIN DEGREE CENTRALITY HERE
+Degree centrality...
 
 ```{r, fig.cap = 'Directed Network Demonstrating the Social Relationships and Perceptions of ECESS Board Members'}
 G_friendship %>%
@@ -101,7 +101,7 @@ G_friendship %>%
   geom_node_text(aes(label = name), color = '#ffffff')
 ```
 
-DESCRIBE TABLE HERE
+DESCRIBE OVERVIEW HERE
 
 ```{r, fig.height=6, fig.cap = 'Directed Network of ECESS Board Relationships Grouped By Strength'}
 G_friendship %>%
@@ -125,6 +125,8 @@ G_friendship %>%
   facet_edges(~Relationship)
 ```
 
+DESCRIBE FACTTED GRAPH HERE
+
 ```{r, fig.cap = 'Directed Friendship Network With Degree Centralities of ECESS Board Members'}
 G_friendship %>%
   activate(edges) %>%
@@ -147,11 +149,11 @@ G_friendship %>%
   geom_node_text(aes(label = name))
 ```
 
-ANALYZE POPULARITY HERE
+ANALYZE POPULARITY AND IMAGE HERE
 
-## Insights on Influence
+## Insights on Influence and Commitment
 
-EXPLAIN EIGENVECTOR CENTRALITY HERE
+Eigenvector centrality helps identify which nodes have the most influence in a network taking into account both a given node's power and the power of that node's first-degree connections. Eigenvector centrality can uncover hidden puppet masters or determine who the crowd tends to follow.
 
 #### Table of ECESS Board Members and Their Respective Friendship Centralities
 ```{r}
@@ -197,7 +199,7 @@ G_friendship %>%
   geom_node_text(aes(label = name))
 ```
 
-DESCRIBE BOXPLOT HERE
+DESCRIBE EIGENVECTOR GRAPH HERE
 
 ```{r, fig.cap = 'Boxplot of ECESS Board Members\' Commitment Levels Vs. Their Friendship Eigenvector Centralities'}
 G_friendship %>%
@@ -216,11 +218,11 @@ G_friendship %>%
   theme_minimal()
 ```
 
-ANALYZE INFLUENCE HERE
+ANALYZE INFLUENCE AND COMMITTMENT HERE
 
-## Insights on Connectivity
+## Insights on Connectivity and Information Diffusion
 
-EXPLAIN BETWEENNESS CENTRALITY HERE
+Betweenness centrality helps find the key connectors in a network. The level of betweenness is calculated by counting the number of times a given node appears on the shortest path between any two other nodes. Nodes with the highest betweenness centrality tend to be those that tie cliques together, which is why connectivity, betweenness centrality, and information diffusion often go hand in hand.
 
 #### Table of ECESS Board Members and Their Respective Communication Centralities
 
@@ -285,7 +287,7 @@ G_friendship %>%
   geom_node_text(aes(label = name))
 ```
 
-ANALYZE CONNECTIVITY HERE
+ANALYZE CONNECTIVITY AND INFORMATION DIFFUSION HERE
 
 \pagebreak
 

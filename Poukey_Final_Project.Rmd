@@ -102,12 +102,10 @@ G_friendship %>%
 
 DESCRIBE TABLE HERE
 
-```{r, fig.cap = 'Directed Network of ECESS Board Relationships Grouped By Strength'}
+```{r, fig.height=7.5, fig.cap = 'Directed Network of ECESS Board Relationships Grouped By Strength'}
 G_friendship %>%
   activate(edges) %>%
   mutate(Relationship = as_factor(Friendship)) %>%
-  mutate(Strong = ifelse(abs(Friendship) == 2, 'Strong', 'Weak')) %>%
-  filter(!is.na(Strong)) %>%
 
   activate(nodes) %>%
   mutate(degree = centrality_degree(mode = 'all')) %>%
@@ -126,7 +124,7 @@ G_friendship %>%
   geom_node_point(aes(shape = Exec), size = 6) +
   geom_node_text(aes(label = name), color = '#ffffff') +
   
-  facet_edges(~Strong)
+  facet_edges(~Relationship)
 ```
 
 ANALYZE POPULARITY HERE

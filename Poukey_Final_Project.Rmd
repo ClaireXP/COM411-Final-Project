@@ -75,7 +75,7 @@ G_communication = graph_from_data_frame(d=communication_edges, v=nodes) %>% as_t
 
 # Network Analysis
 
-At the base level, centrality measures how important, or central, a node is in a given network. This measurement of importance can be found through several different methods, such as degree centrality, eigenvector centrality, and betweenness centrality. In this analysis, we will explore each centrality and provide insights 
+At the base level, centrality measures how important, or central, a node is in a given network. This measurement of importance can be found through several different methods, such as degree centrality, eigenvector centrality, and betweenness centrality. In this sample analysis, we will explore each centrality and provide insights.
 
 ## Insights on Popularity and Image
 

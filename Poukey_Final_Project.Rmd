@@ -44,7 +44,7 @@ Communication analysis is based on the frequency of communication between ECESS 
 
 ```{r}
 # Import list of edges and weights
-edges = read_excel("edgelist.xlsx")
+edges = read_excel('edgelist.xlsx')
 
 # Split up edge data into edges based on friendship
 friendship_edges = edges[-4] %>% filter(!is.na(Friendship))
@@ -61,7 +61,7 @@ Each node represents a board member in ECESS. Board members consist of both the 
 
 ```{r}
 # Import list of nodes and node attributes
-nodes = read_excel("node_atts.xlsx")
+nodes = read_excel('node_atts.xlsx')
 nodes
 ```
 
@@ -75,6 +75,8 @@ G_communication = graph_from_data_frame(d=communication_edges, v=nodes) %>% as_t
 
 # Network Analysis
 
+At the base level, centrality measures how important, or central, a node is in a given network. This measurement of importance can be found through several different methods, such as degree centrality, eigenvector centrality, and betweenness centrality. In this analysis, we will explore each centrality and provide insights 
+
 ## Insights on Popularity
 
 EXPLAIN DEGREE CENTRALITY HERE
@@ -83,9 +85,6 @@ EXPLAIN DEGREE CENTRALITY HERE
 G_friendship %>%
   activate(edges) %>%
   mutate(Relationship = as_factor(Friendship)) %>%
-  
-  activate(nodes) %>%
-  mutate(degree = centrality_degree(mode = 'all')) %>%
   
   ggraph(layout = 'stress') +
   
@@ -104,13 +103,10 @@ G_friendship %>%
 
 DESCRIBE TABLE HERE
 
-```{r, fig.height=7.5, fig.cap = 'Directed Network of ECESS Board Relationships Grouped By Strength'}
+```{r, fig.height=6, fig.cap = 'Directed Network of ECESS Board Relationships Grouped By Strength'}
 G_friendship %>%
   activate(edges) %>%
   mutate(Relationship = as_factor(Friendship)) %>%
-
-  activate(nodes) %>%
-  mutate(degree = centrality_degree(mode = 'all')) %>%
   
   ggraph(layout = 'stress') +
   
@@ -127,6 +123,28 @@ G_friendship %>%
   geom_node_text(aes(label = name), color = '#ffffff') +
   
   facet_edges(~Relationship)
+```
+
+```{r, fig.cap = 'Directed Friendship Network With Degree Centralities of ECESS Board Members'}
+G_friendship %>%
+  activate(edges) %>%
+  filter(Friendship > 0) %>%
+
+  activate(nodes) %>%
+  mutate(Degree = centrality_degree(mode = 'all')) %>%
+
+  ggraph(layout = 'stress') +
+
+  geom_edge_fan(aes(color = stat(index))) +
+  scale_edge_colour_gradient(
+    'Edge direction',
+    low = '#00000000',
+    high = '#00000077',
+    guide = 'edge_direction'
+  ) +
+
+  geom_node_point(aes(color = Exec, size = Degree)) +
+  geom_node_text(aes(label = name))
 ```
 
 ANALYZE POPULARITY HERE
@@ -170,9 +188,9 @@ G_friendship %>%
   geom_edge_fan(aes(color = stat(index))) +
   scale_edge_colour_gradient(
     'Edge direction',
-    low = "#00000000",
-    high = "#00000077",
-    guide = "edge_direction"
+    low = '#00000000',
+    high = '#00000077',
+    guide = 'edge_direction'
   ) +
 
   geom_node_point(aes(color = Exec, size = Eigen)) +
@@ -258,9 +276,9 @@ G_friendship %>%
   geom_edge_fan(aes(color = stat(index))) +
   scale_edge_colour_gradient(
     'Edge direction',
-    low = "#00000000",
-    high = "#00000077",
-    guide = "edge_direction"
+    low = '#00000000',
+    high = '#00000077',
+    guide = 'edge_direction'
   ) +
   
   geom_node_point(aes(color = Exec, size = Betweenness)) +
@@ -276,6 +294,7 @@ ANALYZE CONNECTIVITY HERE
 Thank you for taking the time to review my sample analysis of the Electrical Computer Engineering Society. I believe that with a larger quantity of data and a greater variety of node attributes, there is an opportunity for even deeper organizational insights. I would love to schedule a meeting for the week of May 8th to learn more about your organization. My contact is [cpoukey@gmail.com](mailto:cpoukey@gmail.com). I look forward to hearing from you!
 
 Sincerely,
+
 Claire Poukey
 
 \pagebreak

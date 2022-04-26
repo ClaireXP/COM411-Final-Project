@@ -1,0 +1,292 @@
+---
+title: 'COM 411: Final Project'
+author: "Claire Poukey"
+output:
+  html_document:
+    df_print: paged
+    fig_align: center
+  word_document:
+    fig_width: 7.5
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F)
+knitr::opts_knit$set(root.dir = './')
+library(igraph)
+library(ggraph)
+library(tidygraph)
+library(tidyverse)
+library(networkdata)
+library(readxl)
+set_graph_style(family='sans')
+```
+
+# Introduction
+
+Dear Electrical Computer Engineering Student Society,
+
+My name is Claire Poukey, and I am a second-year undergraduate student studying Computer Engineering at Purdue University. As shown on your website, the Electrical Computer Engineering Student Society (ECESS) aims to promote and create social, cultural, and professional opportunities for all undergraduate students majoring in either Electrical Engineering or Computer Engineering. So, as a student under the Elmore Family School of Electrical and Computer Engineering, and by the transitive property, I have vested interest in the continued functionality of your organization.
+
+A few weeks ago, I overheard a conflict among ECESS' 2020-2021 committee chairs and executive board in the Materials Science and Electrical Engineering building. It seems that committee chairs believe that the executive board assign excessive rules such as holding two events per month despite none of the executive committee having any event planning experience. This open distaste, not only for the executive board, but also between select individuals regardless of executive status, lowers the overall efficiency of the leadership team (Ong, 2013). Friendship has a positive, direct correlation to levels of both commitment and trust in an organization (Shakoor, 2020; Kunday, 2014). Communication also plays a large role in organizational success. And according to "Benefits of Effective Communication in the Workplace", "Effective communication helps us better understand a person or situation and enables us to resolve differences, build trust and respect, and create environments where creative ideas, problem solving, affection, and caring can flourish" (Станишевская, 2014).
+
+Over the past semester, I have been studying social networks--a way of providing high-level organizational insights based on scientific evidence. This analysis would be extremely useful for the Electrical Computer Engineering Society, as it can identify subtle rifts between members of the leadership team and potential contributing factors. I would be very interested in taking a network analysis approach to your organization. In fact, I have prepared a sample analysis below based on the behaviors I have witnessed in your organization. The sample is broken down into three major insights--popularity and general perception, influence and commitment, and connectivity and information diffusion.
+
+## Dataset Introduction
+
+### Edgelists and Edge Weights
+
+There are two main types of relations with their own set of weights being analyzed--friendship and communication.
+
+Friendship is based on the social relationship and general perception between ECESS board members. Slightly negative and slightly positive relationships indicate disdain and acquaintanceship respectively, with disdain being minor distaste and  acquaintanceship being openly friendly. Negative and positive relationships with higher magnitudes indicate open hatred and established close friendship  respectively.
+
+Communication analysis is based on the frequency of communication between ECESS board members. Since communication is carried out between two people, the graph is undirected, as it assumes all communication is mutual. Higher numbers on the communication scale indicate a higher frequency of collaboration.
+
+```{r}
+# Import list of edges and weights
+edges = read_excel("edgelist.xlsx")
+
+# Split up edge data into edges based on friendship
+friendship_edges = edges[-4] %>% filter(!is.na(Friendship))
+
+# Split up edge data into edges based on communication frequency
+communication_edges = edges[-3] %>% filter(!is.na(Communication))
+```
+
+### Nodes and Node Attributes
+
+Each node represents a board member in ECESS. Board members consist of both the executive board and the committee chairs as detailed in the table below.
+
+##### ECESS Board Node List
+
+```{r}
+# Import list of nodes and node attributes
+nodes = read_excel("node_atts.xlsx")
+nodes
+```
+
+```{r}
+# Create preliminary tbl graphs--one for friendship and one for communication frequency
+G_friendship = graph_from_data_frame(d=friendship_edges, v=nodes) %>% as_tbl_graph()
+G_communication = graph_from_data_frame(d=communication_edges, v=nodes) %>% as_tbl_graph()
+```
+
+\pagebreak
+
+# Network Analysis
+
+## Insights on Popularity
+
+EXPLAIN DEGREE CENTRALITY HERE
+
+```{r, fig.cap = 'Directed Network Demonstrating the Social Relationships and Perceptions of ECESS Board Members'}
+G_friendship %>%
+  activate(edges) %>%
+  mutate(Relationship = as_factor(Friendship)) %>%
+  
+  activate(nodes) %>%
+  mutate(degree = centrality_degree(mode = 'all')) %>%
+  
+  ggraph(layout = 'stress') +
+  
+  geom_edge_fan(aes(alpha = stat(index), color = Relationship)) +
+  scale_edge_alpha('Edge direction', guide = 'edge_direction') +
+  scale_edge_color_manual(values = c(
+    '-2' = '#85040f', 
+    '-1' = '#cc9399',
+    '1' = '#95cccf', 
+    '2' = '#047e85')
+  ) +
+
+  geom_node_point(aes(shape = Exec), size = 6) +
+  geom_node_text(aes(label = name), color = '#ffffff')
+```
+
+DESCRIBE TABLE HERE
+
+```{r, fig.cap = 'Directed Network of ECESS Board Relationships Grouped By Strength'}
+G_friendship %>%
+  activate(edges) %>%
+  mutate(Relationship = as_factor(Friendship)) %>%
+  mutate(Strong = ifelse(abs(Friendship) == 2, 'Strong', 'Weak')) %>%
+  filter(!is.na(Strong)) %>%
+
+  activate(nodes) %>%
+  mutate(degree = centrality_degree(mode = 'all')) %>%
+  
+  ggraph(layout = 'stress') +
+  
+  geom_edge_fan(aes(alpha = stat(index), color = Relationship)) +
+  scale_edge_alpha('Edge direction', guide = 'edge_direction') +
+  scale_edge_color_manual(values = c(
+    '-2' = '#85040f', 
+    '-1' = '#cc9399',
+    '1' = '#95cccf', 
+    '2' = '#047e85')
+  ) +
+
+  geom_node_point(aes(shape = Exec), size = 6) +
+  geom_node_text(aes(label = name), color = '#ffffff') +
+  
+  facet_edges(~Strong)
+```
+
+ANALYZE POPULARITY HERE
+
+## Insights on Influence
+
+EXPLAIN EIGENVECTOR CENTRALITY HERE
+
+#### Table of ECESS Board Members and Their Respective Friendship Centralities
+```{r}
+G_friendship %>%
+  activate(edges) %>%
+  filter(Friendship > 0) %>%
+  
+  activate(nodes) %>%
+  mutate(
+    Eigen = centrality_eigen(),
+    Betweenness = centrality_betweenness(),
+    Indegree = centrality_degree(mode = 'in'),
+    Outdegree = centrality_degree(mode = 'out'),
+    Degree = centrality_degree(mode = 'all')
+  ) %>%
+
+  as_tibble() %>%
+  select(name, Exec, Eigen, Betweenness, Degree, Indegree, Outdegree) %>%
+  arrange(-Degree)
+```
+
+DESCRIBE TABLE HERE
+
+```{r, fig.cap = 'Directed Friendship Network With Eigenvector Centralities of ECESS Board Members'}
+G_friendship %>%
+  activate(edges) %>%
+  filter(Friendship > 0) %>%
+
+  activate(nodes) %>%
+  mutate(Eigen = centrality_eigen()) %>%
+
+  ggraph(layout = 'stress') +
+
+  geom_edge_fan(aes(color = stat(index))) +
+  scale_edge_colour_gradient(
+    'Edge direction',
+    low = "#00000000",
+    high = "#00000077",
+    guide = "edge_direction"
+  ) +
+
+  geom_node_point(aes(color = Exec, size = Eigen)) +
+  geom_node_text(aes(label = name))
+```
+
+DESCRIBE BOXPLOT HERE
+
+```{r, fig.cap = 'Boxplot of ECESS Board Members\' Commitment Levels Vs. Their Friendship Eigenvector Centralities'}
+G_friendship %>%
+  activate(edges) %>%
+  filter(Friendship > 0) %>%
+  
+  activate(nodes) %>%
+  mutate(
+    Eigen = centrality_eigen(),
+    Commitment = as_factor(Commitment)
+  ) %>%
+
+  as_tibble() %>%
+  ggplot() + 
+  geom_boxplot(aes(x=Commitment, fill=Commitment, y=Eigen)) +
+  theme_minimal()
+```
+
+ANALYZE INFLUENCE HERE
+
+## Insights on Connectivity
+
+EXPLAIN BETWEENNESS CENTRALITY HERE
+
+```{r, fig.cap = 'Undirected Network of Communication Levels Between ECESS Board Members'}
+G_communication %>%
+  activate(edges) %>%
+  filter(Communication > 0) %>%
+  
+  ggraph(layout = 'stress') +
+  
+  # Essentially using color alpha to create a continuous alpha scale
+  geom_edge_fan(aes(color = Communication)) +
+  scale_edge_color_continuous(
+    low = '#00000011',
+    high = '#000000ff',
+    guide = 'edge_colourbar'
+  ) +
+
+  geom_node_point(aes(shape = Exec), size = 6) +
+  geom_node_text(aes(label = name), color = '#ffffff')
+```
+
+DESCRIBE NETWORK HERE
+
+#### Table of ECESS Board Members and Their Respective Communication Centralities
+
+```{r}
+G_communication %>%
+  activate(nodes) %>%
+  mutate(
+    Eigen = centrality_eigen(),
+    Betweenness = centrality_betweenness(),
+    Indegree = centrality_degree(mode = 'in'),
+    Outdegree = centrality_degree(mode = 'out'),
+    Degree = centrality_degree(mode = 'all')
+  ) %>%
+
+  as_tibble() %>%
+  select(name, Exec, Eigen, Betweenness, Degree, Indegree, Outdegree) %>%
+  arrange(-Eigen)
+```
+
+DESCRIBE TABLE HERE
+
+```{r, fig.height=4.75, fig.cap = 'Directed Friendship Network With Betweenness Centralities of ECESS Board Members'}
+G_friendship %>%
+  activate(edges) %>%
+  filter(Friendship > 0) %>%
+
+  activate(nodes) %>%
+  mutate(Betweenness = centrality_betweenness()) %>%
+
+  ggraph(layout = 'stress') +
+
+  geom_edge_fan(aes(color = stat(index))) +
+  scale_edge_colour_gradient(
+    'Edge direction',
+    low = "#00000000",
+    high = "#00000077",
+    guide = "edge_direction"
+  ) +
+  
+  geom_node_point(aes(color = Exec, size = Betweenness)) +
+  geom_node_text(aes(label = name))
+```
+
+ANALYZE CONNECTIVITY HERE
+
+\pagebreak
+
+# Conclusion
+
+Thank you for taking the time to review my sample analysis of the Electrical Computer Engineering Society. I believe that with a larger quantity of data and a greater variety of node attributes, there is an opportunity for even deeper organizational insights. I would love to schedule a meeting for the week of May 8th to learn more about your organization. My contact is [cpoukey@gmail.com](mailto:cpoukey@gmail.com). I look forward to hearing from you!
+
+Sincerely,
+Claire Poukey
+
+\pagebreak
+
+# References
+
+Станишевская, В. Д. (2014). Benefits of effective communication in the workplace.
+
+Kunday, Ö. (2014). Investigating the Role of Workplace Friendship on Organizational Commitment. International Journal of Management Sciences and Business Research, 3(6). https://ssrn.com/abstract=2727025 
+
+Ong, L. D. (2013). Workplace friendship, trust in coworkers and employees' OCB. Актуальні проблеми економіки, (2), 289-294.
+
+Shakoor, R. (2020). Workplace conflicts and its effect on employee productivity: A mediating role of workplace politics. International Journal of Psychosocial Rehabilitation, 24(3), 2774–2783. https://doi.org/10.37200/ijpr/v24i3/pr2020313 

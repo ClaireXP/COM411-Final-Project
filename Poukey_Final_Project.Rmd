@@ -26,9 +26,9 @@ set_graph_style(family='sans')
 
 Dear Electrical Computer Engineering Student Society,
 
-My name is Claire Poukey, and I am a second-year undergraduate student studying Computer Engineering at Purdue University. As shown on your website, the Electrical Computer Engineering Student Society (ECESS) aims to promote and create social, cultural, and professional opportunities for all undergraduate students majoring in either Electrical Engineering or Computer Engineering. So, as a student under the Elmore Family School of Electrical and Computer Engineering, and by the transitive property, I have vested interest in the continued functionality of your organization.
+My name is Claire Poukey, and I am a second-year undergraduate student studying Computer Engineering at Purdue University. As shown on your website, the Electrical Computer Engineering Student Society (ECESS) aims to promote and create social, cultural, and professional opportunities for all undergraduate students majoring in either Electrical Engineering or Computer Engineering. So, as a student under the Elmore Family School of Electrical and Computer Engineering, and by the transitive property, I have a vested interest in the continued functionality of your organization.
 
-A few weeks ago, I overheard a conflict among ECESS' 2020-2021 committee chairs and executive board in the Materials Science and Electrical Engineering building. It seems that committee chairs believe that the executive board assign excessive rules such as holding two events per month despite none of the executive committee having any event planning experience. This open distaste, not only for the executive board, but also between select individuals regardless of executive status, lowers the overall efficiency of the leadership team (Ong, 2013). Friendship has a positive, direct correlation to levels of both commitment and trust in an organization (Shakoor, 2020; Kunday, 2014). Communication also plays a large role in organizational success. And according to "Benefits of Effective Communication in the Workplace", "Effective communication helps us better understand a person or situation and enables us to resolve differences, build trust and respect, and create environments where creative ideas, problem solving, affection, and caring can flourish" (Станишевская, 2014).
+A few weeks ago, I overheard a conflict among ECESS' 2020-2021 committee chairs and executive board in the Materials Science and Electrical Engineering building. It seems that committee chairs believe that the executive board assigns excessive rules such as holding two events per month despite none of the executive committee having any event planning experience. This open distaste, not only for the executive board but also between select individuals regardless of executive status, lowers the overall efficiency of the leadership team (Ong, 2013). Friendship has a positive, direct correlation to levels of both commitment and trust in an organization (Shakoor, 2020; Kunday, 2014). Communication also plays a large role in organizational success. And according to "Benefits of Effective Communication in the Workplace", "Effective communication helps us better understand a person or situation and enables us to resolve differences, build trust and respect, and create environments where creative ideas, problem-solving, affection, and caring can flourish" (Станишевская, 2014).
 
 Over the past semester, I have been studying social networks--a way of providing high-level organizational insights based on scientific evidence. This analysis would be extremely useful for the Electrical Computer Engineering Society, as it can identify subtle rifts between members of the leadership team and potential contributing factors. I would be very interested in taking a network analysis approach to your organization. In fact, I have prepared a sample analysis below based on the behaviors I have witnessed in your organization. The sample is broken down into three major insights--popularity and general perception, influence and commitment, and connectivity and information diffusion.
 
@@ -36,9 +36,9 @@ Over the past semester, I have been studying social networks--a way of providing
 
 ### Edgelists and Edge Weights
 
-There are two main types of relations with their own set of weights being analyzed--friendship and communication.
+"Edges" represent relationships between two people. There are two main types of relations with their own set of weights being analyzed--friendship and communication.
 
-Friendship is based on the social relationship and general perception between ECESS board members. Slightly negative and slightly positive relationships indicate disdain and acquaintanceship respectively, with disdain being minor distaste and  acquaintanceship being openly friendly. Negative and positive relationships with higher magnitudes indicate open hatred and established close friendship  respectively.
+Friendship is based on the social relationship and general perception between ECESS board members. Slightly negative and slightly positive relationships indicate disdain and acquaintanceship respectively, with disdain being minor distaste and acquaintanceship being openly friendly. Negative and positive relationships with higher magnitudes indicate open dislike and established close friendship respectively. These friendship edges are directed, which means they can be one way--outgoing or incoming--or mutual.
 
 Communication analysis is based on the frequency of communication between ECESS board members. Since communication is carried out between two people, the graph is undirected, as it assumes all communication is mutual. Higher numbers on the communication scale indicate a higher frequency of collaboration.
 
@@ -55,7 +55,7 @@ communication_edges = edges[-3] %>% filter(!is.na(Communication))
 
 ### Nodes and Node Attributes
 
-Each node represents a board member in ECESS. Board members consist of both the executive board and the committee chairs as detailed in the table below.
+Each "node" represents a board member in ECESS. Board members consist of both the executive board and the committee chairs as detailed in the table below.
 
 ##### ECESS Board Node List
 
@@ -79,44 +79,56 @@ At the base level, centrality measures how important, or central, a node is in a
 
 ## Insights on Popularity and Image
 
-Degree centrality...
+Degree centrality is one way to measure popularity. By counting the number of people who have positive relationships pointing towards a given node, we can understand which nodes are the most liked in the network. Image can be interpreted through popularity and by visually representing the number and strength of incoming edges.
 
 ```{r, fig.cap = 'Directed Network Demonstrating the Social Relationships and Perceptions of ECESS Board Members'}
 G_friendship %>%
   activate(edges) %>%
   mutate(Relationship = as_factor(Friendship)) %>%
+  mutate(Relationship = 
+    ifelse(Relationship == '-2', 'Dislike',
+    ifelse(Relationship == '-1', 'Distaste',
+    ifelse(Relationship == '1',  'Friendly',
+                               'Friends'
+  )))) %>%
   
   ggraph(layout = 'stress') +
   
   geom_edge_fan(aes(alpha = stat(index), color = Relationship)) +
   scale_edge_alpha('Edge direction', guide = 'edge_direction') +
   scale_edge_color_manual(values = c(
-    '-2' = '#85040f', 
-    '-1' = '#cc9399',
-    '1' = '#95cccf', 
-    '2' = '#047e85')
+    'Dislike' = '#85040f', 
+    'Distaste' = '#cc9399',
+    'Friendly' = '#95cccf', 
+    'Friends' = '#047e85')
   ) +
 
   geom_node_point(aes(shape = Exec), size = 6) +
   geom_node_text(aes(label = name), color = '#ffffff')
 ```
 
-DESCRIBE OVERVIEW HERE
+From this network overview, we can already begin to tell who is liked and who is disliked on the board. Nodes 3 and 10 have especially bad images. This is especially likely to cause problems, as node 10 is a very public member of the executive board. On the other hand, number 7, also on the executive board, has a great image. Numbers 11, 6, and 1 all have particularly positive images as well, while the rest of the nodes have slightly positive images. Referencing the theory that those with better images are more likely to have higher workplace efficiencies.
 
-```{r, fig.height=6, fig.cap = 'Directed Network of ECESS Board Relationships Grouped By Strength'}
+```{r, fig.height=5.5, fig.cap = 'Directed Network of ECESS Board Relationships Grouped By Strength'}
 G_friendship %>%
   activate(edges) %>%
   mutate(Relationship = as_factor(Friendship)) %>%
+  mutate(Relationship = 
+    ifelse(Relationship == '-2', 'Dislike',
+    ifelse(Relationship == '-1', 'Distaste',
+    ifelse(Relationship == '1',  'Friendly',
+                               'Friends'
+  )))) %>%
   
   ggraph(layout = 'stress') +
   
   geom_edge_fan(aes(alpha = stat(index), color = Relationship)) +
   scale_edge_alpha('Edge direction', guide = 'edge_direction') +
   scale_edge_color_manual(values = c(
-    '-2' = '#85040f', 
-    '-1' = '#cc9399',
-    '1' = '#95cccf', 
-    '2' = '#047e85')
+    'Dislike' = '#85040f', 
+    'Distaste' = '#cc9399',
+    'Friendly' = '#95cccf', 
+    'Friends' = '#047e85')
   ) +
 
   geom_node_point(aes(shape = Exec), size = 6) +
@@ -125,15 +137,15 @@ G_friendship %>%
   facet_edges(~Relationship)
 ```
 
-DESCRIBE FACTTED GRAPH HERE
+The graph above uses faceting to create 4 network visualizations grouped by relationship strength. Through this visualization, it makes it even more apparent that nodes 10 and 3 are the only nodes with overall negative images. And we now notice more clearly that the only other node with a negative perception is node 11, which is node 10's rival. We can also notice that there are specific nodes, namely 7 and 11, who are close friends with several members of the board. Since friendship and trust are correlated, it would make sense if nodes 7 and 11 were both highly efficient in their jobs and in the know regarding other peoples' progress and personal lives.
 
-```{r, fig.cap = 'Directed Friendship Network With Degree Centralities of ECESS Board Members'}
+```{r, fig.height=5, fig.cap = 'Directed Friendship Network With Degree Centralities of ECESS Board Members'}
 G_friendship %>%
   activate(edges) %>%
   filter(Friendship > 0) %>%
 
   activate(nodes) %>%
-  mutate(Degree = centrality_degree(mode = 'all')) %>%
+  mutate(Degree = centrality_degree(mode = 'in')) %>%
 
   ggraph(layout = 'stress') +
 
@@ -149,7 +161,7 @@ G_friendship %>%
   geom_node_text(aes(label = name))
 ```
 
-ANALYZE POPULARITY AND IMAGE HERE
+With this new visualization that removes the aspect of image and emphasizes popularity through positive incoming relationships, we can see again that nodes 7 and 11 hold a lot of influence in the network. Node 1, who had a more positive relationship on average, also seems particularly popular. However, it now becomes much more clear just how many members are socially isolated or neutral. Nodes 3, 8, 4, 2, 6, and 10 all have low positive indegree centralities. Note that unpopular nodes 10 and 2 are both on the executive board, while popular nodes 1 and 11 are not.
 
 ## Insights on Influence and Commitment
 
@@ -172,34 +184,10 @@ G_friendship %>%
 
   as_tibble() %>%
   select(name, Exec, Eigen, Betweenness, Degree, Indegree, Outdegree) %>%
-  arrange(-Degree)
+  arrange(-Eigen)
 ```
 
-DESCRIBE TABLE HERE
-
-```{r, fig.cap = 'Directed Friendship Network With Eigenvector Centralities of ECESS Board Members'}
-G_friendship %>%
-  activate(edges) %>%
-  filter(Friendship > 0) %>%
-
-  activate(nodes) %>%
-  mutate(Eigen = centrality_eigen()) %>%
-
-  ggraph(layout = 'stress') +
-
-  geom_edge_fan(aes(color = stat(index))) +
-  scale_edge_colour_gradient(
-    'Edge direction',
-    low = '#00000000',
-    high = '#00000077',
-    guide = 'edge_direction'
-  ) +
-
-  geom_node_point(aes(color = Exec, size = Eigen)) +
-  geom_node_text(aes(label = name))
-```
-
-DESCRIBE EIGENVECTOR GRAPH HERE
+From this table, we can discern who holds the most social influence in the network. Node 11, who also had one of the best images and highest popularity, also holds the highest eigenvector centrality. Nodes 7, 1, and 6, who also had high levels of popularity and particularly positive images hold the 2nd, 3rd, and 4th highest levels of influence respectively. Notice that after node 5, nodes 8, 4, and 3 drop significantly in the magnitude of influence due to their status as social isolates.
 
 ```{r, fig.cap = 'Boxplot of ECESS Board Members\' Commitment Levels Vs. Their Friendship Eigenvector Centralities'}
 G_friendship %>%
@@ -218,31 +206,11 @@ G_friendship %>%
   theme_minimal()
 ```
 
-ANALYZE INFLUENCE AND COMMITTMENT HERE
+We can go further into group power dynamics, a sense of belonging, and the level of efficiency by plotting commitment levels against the eigenvector centralities of each board member. Although there are a few outliers, there appears to be a very strong, significant correlation between how much social influence a board member has and their commitment level. This verifies the concept that those with higher levels of friendship and higher levels of belonging are more likely to have higher levels of efficiency and take on more responsibilities in an organization.
 
 ## Insights on Connectivity and Information Diffusion
 
 Betweenness centrality helps find the key connectors in a network. The level of betweenness is calculated by counting the number of times a given node appears on the shortest path between any two other nodes. Nodes with the highest betweenness centrality tend to be those that tie cliques together, which is why connectivity, betweenness centrality, and information diffusion often go hand in hand.
-
-#### Table of ECESS Board Members and Their Respective Communication Centralities
-
-```{r}
-G_communication %>%
-  activate(nodes) %>%
-  mutate(
-    Eigen = centrality_eigen(),
-    Betweenness = centrality_betweenness(),
-    Indegree = centrality_degree(mode = 'in'),
-    Outdegree = centrality_degree(mode = 'out'),
-    Degree = centrality_degree(mode = 'all')
-  ) %>%
-
-  as_tibble() %>%
-  select(name, Exec, Eigen, Betweenness, Degree, Indegree, Outdegree) %>%
-  arrange(-Eigen)
-```
-
-DESCRIBE TABLE HERE
 
 ```{r, fig.cap = 'Undirected Network of Communication Levels Between ECESS Board Members'}
 G_communication %>%
@@ -263,7 +231,7 @@ G_communication %>%
   geom_node_text(aes(label = name), color = '#ffffff')
 ```
 
-DESCRIBE NETWORK HERE
+This network visualizes the levels of communication between nodes throughout the network. From this visualization, nodes 7 and 1 appear to be the most connected with nodes 5, 11, 2, and 9 close behind. The other nodes seemingly have little communication with the rest of the board, although everyone has at least one strong connection to a fairly central node in the network. Even those with slightly lower levels of communication are connected to a diverse group of nodes without clear clusters. Thus, it is very likely that there is a good flow of information between board members. However, this does not mean that the types of information flowing throughout the network are necessarily relevant to the organization or that they are positive. For example, board members have been known to talk negatively about other board members, which would qualify in increasing their communication level.
 
 ```{r, fig.height=4.75, fig.cap = 'Directed Friendship Network With Betweenness Centralities of ECESS Board Members'}
 G_friendship %>%
@@ -287,7 +255,7 @@ G_friendship %>%
   geom_node_text(aes(label = name))
 ```
 
-ANALYZE CONNECTIVITY AND INFORMATION DIFFUSION HERE
+In the graph above, again, we can clearly see that nodes 1 and 11 are highly connected to all the other nodes in the graph when it comes to the flow of information. It is very likely that if important information is passed through nodes 1 or 11, it will spread quickly to the rest of the nodes in the network. Node 7, the only executive member with high influence and a particularly positive image, is slightly less influential than nodes 1 and 11. Node 5, who performed quite average in the other power calculations has a very high level of connectivity due to them being the only one connected to node 3, who the other committee members avoid and hold a distaste or disliking for. The rest of the nodes have very little control when it comes to the flow of information.
 
 \pagebreak
 
